@@ -52,46 +52,36 @@ function setupFireworks() {
   const gravity = 0.08;
   const drag = 0.98;
 
-  // Tạo vụ nổ tại (x, y) với hiệu ứng cải tiến
-  function burst(x, y, count = 100, power = 6) {
-    const color = palette[Math.floor(Math.random() * palette.length)];
+  // Tạo vụ nổ pháo hoa - giảm hiệu suất
+  function createExplosion(x, y, color) {
+    const particleCount = 40; // Giảm từ 80-160 xuống 40
+    const power = 3 + Math.random() * 3; // Giảm từ 5-9 xuống 3-6
     
-    // Tạo nhiều lớp particle cho hiệu ứng sâu
-    for (let layer = 0; layer < 3; layer++) {
-      const layerCount = count * (1 - layer * 0.3);
-      const layerPower = power * (1 - layer * 0.2);
+    for (let i = 0; i < particleCount; i++) {
+      const particleAngle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+      const velocity = power * (0.5 + Math.random() * 0.5);
       
-      for (let i = 0; i < layerCount; i++) {
-        const angle = (Math.PI * 2 * i) / layerCount + Math.random() * 0.3;
-        const speed = layerPower + Math.random() * layerPower * 0.8;
-        
-        particles.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          life: 120 + Math.random() * 60,
-          alpha: 1,
-          color: layer === 0 ? color : adjustColor(color, layer * 20),
-          sparkle: Math.random() < 0.5,
-          size: (3 - layer) + Math.random() * 2,
-          trail: [],
-          maxTrailLength: 8 - layer * 2,
-          rotation: Math.random() * Math.PI * 2,
-          rotationSpeed: (Math.random() - 0.5) * 0.2,
-        });
-      }
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(particleAngle) * velocity,
+        vy: Math.sin(particleAngle) * velocity,
+        color: color,
+        alpha: 1,
+        size: 2 + Math.random() * 2,
+        trail: []
+      });
     }
     
-    // Thêm sparkles đặc biệt
-    for (let i = 0; i < 30; i++) {
-      const angle = Math.random() * Math.PI * 2;
+    // Giảm số lượng sparkles
+    for (let i = 0; i < 10; i++) { // Giảm từ 30 xuống 10
+      const sparkleAngle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 8 + 4;
       particles.push({
         x,
         y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
+        vx: Math.cos(sparkleAngle) * speed,
+        vy: Math.sin(sparkleAngle) * speed,
         life: 80 + Math.random() * 40,
         alpha: 1,
         color: Math.random() > 0.5 ? "#FFFFFF" : "#FFD700",
@@ -200,17 +190,16 @@ function setupFireworks() {
     requestAnimationFrame(tick);
   }
 
-  // Tạo pháo hoa ngẫu nhiên định kỳ với biến thể
+  // Tạo pháo hoa ngẫu nhiên định kỳ - giảm hiệu suất
   const autoTimer = setInterval(() => {
     const x = 100 + Math.random() * (width - 200);
     const y = 100 + Math.random() * (height * 0.4);
-    const count = 80 + Math.floor(Math.random() * 80);
-    const power = 5 + Math.random() * 4;
-    burst(x, y, count, power);
-  }, 1800);
+    const color = palette[Math.floor(Math.random() * palette.length)];
+    createExplosion(x, y, color);
+  }, 3000); // Tăng từ 1.8s lên 3s
 
   // Lưu tham chiếu vào element để dùng ở handler bên ngoài
-  canvas._burst = burst;
+  canvas._burst = createExplosion;
   tick();
 }
 
@@ -266,7 +255,7 @@ function setupPetals() {
 }
 
 /**
- * Thiết lập hiệu ứng nâng cao
+ * Thiết lập hiệu ứng nâng cao - giảm hiệu suất
  */
 function setupEnhancedEffects() {
   // Click anywhere để bắn pháo hoa
@@ -275,7 +264,8 @@ function setupEnhancedEffects() {
     
     const canvas = document.getElementById("fireworks");
     if (canvas && canvas._burst) {
-      canvas._burst(e.clientX, e.clientY, 120, 7);
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      canvas._burst(e.clientX, e.clientY, color);
     }
   });
   
@@ -286,7 +276,8 @@ function setupEnhancedEffects() {
     const canvas = document.getElementById("fireworks");
     if (canvas && canvas._burst) {
       const touch = e.touches[0];
-      canvas._burst(touch.clientX, touch.clientY, 120, 7);
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      canvas._burst(touch.clientX, touch.clientY, color);
     }
   });
 }
